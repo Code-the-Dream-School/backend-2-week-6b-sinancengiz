@@ -1,10 +1,32 @@
 <h1>Ajax#home</h1>
 <p>Find me in app/views/ajax/home.html.erb</p>
 <button id="list-todos" type="button">List todos</button><br>
-<label>title</label><input id="todo-title"><label>created by</label>
-<input id="todo-created-by"><button id="create-todo" type="button">Create todo</button><br>
+<label>title</label>
+<input id="todo-title">
+<label>created by</label>
+<input id="todo-created-by">
+<button id="create-todo" type="button">Create todo</button><br>
 <div id="results-div"></div>
+
+<h1>this is second part of assignment to bring items</h1>
+<label>TO DO ID</label>
+<input id="todo-id">
+<button id="list-items" type="button">List Items</button><br>
+<div id="results-items"></div>
+
+<h1>Add Item to ToDO</h1>
+<label>Item Name</label>
+<input id="item-name">
+<label>ToDo ID</label>
+<input id="item-todo-id">
+<label for="vehicle1"> Done</label><br>
+<input type="checkbox" id="done_check" name="done" value="Done">
+<button id="add-item" type="button">Add Items</button><br>
+
+
+
 <script>
+
 document.addEventListener('DOMContentLoaded', (event) => {
   console.log('DOM fully loaded and parsed');
   const resultsDiv = document.getElementById('results-div');
@@ -50,5 +72,58 @@ document.addEventListener('DOMContentLoaded', (event) => {
     console.log("sending data:",dataToSend)
     eventRequest.send(dataToSend);
   });
+
+
+  const addItemButton = document.getElementById('add-item');
+  const item_name = document.getElementById('item-name');
+  const item_todo_id = document.getElementById('item-todo-id')
+  //const checkbox = document.getElementById("done_check").checked;
+  const checkbox = document.querySelector('input[value="Done"]');
+  addItemButton.addEventListener('click', (event) => {
+    var eventRequest = new XMLHttpRequest();
+    eventRequest.onreadystatechange = function () {
+      if(eventRequest.readyState === XMLHttpRequest.DONE) {
+        if  (eventRequest.status === 201) {     // this is the expected return code for a POST to create a todo
+          //resultsDiv.textContent=eventRequest.responseText; // this will be the todo that is created
+        } else {
+          alert(`Return code ${eventRequest.status} ${eventRequest.statusText} ${eventRequest.responseText}`);  // error handling
+        }
+      }
+    };
+    eventRequest.open('POST', 'http://localhost:3001/todos/'+ item_todo_id.value +'/items');  // method and URL to create a todo
+    eventRequest.setRequestHeader("Content-Type", "application/json");  // always do this on POST or PUT
+    let dataToSend = `{"name": "${item_name.value}", "done": ${checkbox.checked}}` // JSON for the create
+    console.log("sending data:",dataToSend)
+    eventRequest.send(dataToSend);
+  });
+
+
+  const resultsItemsDiv = document.getElementById('results-items');
+  const listItemssButton = document.getElementById('list-items');
+  const todoId = document.getElementById('todo-id');
+  listItemssButton.addEventListener('click', (event) => { // event handler for the list todos button
+      var eventRequest = new XMLHttpRequest(); // we create this to set up for the Ajax call
+      eventRequest.onreadystatechange = function () { // event handler for the ajax call
+        if(eventRequest.readyState === XMLHttpRequest.DONE) { // only handle DONE
+          if  (eventRequest.status === 200) { // we expect a 200 from a GET
+            resultsItemsDiv.innerHTML=''; // Clear out this resultsDiv
+            var jsonArr = JSON.parse(eventRequest.responseText); // we get an array of objects in JSON format
+            for (let i=0; i<jsonArr.length; i+=1) {
+              let parag = document.createElement('P');
+              parag.textContent = JSON.stringify(jsonArr[i]); // each is a todo object, which we convert to a string for display
+              resultsItemsDiv.appendChild(parag); // and add it to the div
+            }
+          } else {
+            alert(`Return code ${eventRequest.status} ${eventRequest.statusText}`); // this is how we report errors
+          }
+        }
+      };
+      eventRequest.open('GET', 'http://localhost:3001/todos/'+ todoId.value + '/items');  // this is the URL and method for listing todos
+      eventRequest.send();  // here we send the request.  Note that it is asynchronous, so you need an event handler
+    });
+
+
+
 });
+
 </script>
