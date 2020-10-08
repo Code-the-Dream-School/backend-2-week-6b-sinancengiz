@@ -1,27 +1,61 @@
-<h1>Ajax#home</h1>
-<p>Find me in app/views/ajax/home.html.erb</p>
-<button id="list-todos" type="button">List todos</button><br>
-<label>title</label>
-<input id="todo-title">
-<label>created by</label>
-<input id="todo-created-by">
-<button id="create-todo" type="button">Create todo</button><br>
-<div id="results-div"></div>
 
-<h1>this is second part of assignment to bring items</h1>
-<label>TO DO ID</label>
-<input id="todo-id">
-<button id="list-items" type="button">List Items</button><br>
-<div id="results-items"></div>
+<div class="jumbotron" style="text-align:center; margin:50px;">
+  <h1>Ajax Application Home Page</h1>
+  <p>Find me in app/views/ajax/home.html.erb</p>
+</div>
 
-<h1>Add Item to ToDO</h1>
-<label>Item Name</label>
-<input id="item-name">
-<label>ToDo ID</label>
-<input id="item-todo-id">
-<label for="vehicle1"> Done</label><br>
-<input type="checkbox" id="done_check" name="done" value="Done">
-<button id="add-item" type="button">Add Items</button><br>
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div style="text-align:center; margin:50px;">
+        <h2>Click the button to list all todos</h2>
+        <div id="results-div"></div>
+        <button class="btn btn-primary"  id="list-todos" type="button">List todos</button><br>
+      </div>
+    </div>
+    <div class="col">
+      <div style="text-align:center; margin:50px;">
+        <h2>Create A ToDo List</h2>
+        <label>ToDo Title</label><br>
+        <input id="todo-title"><br>
+        <label>Created By</label><br>
+        <input id="todo-created-by"><br><br>
+        <button  class="btn btn-primary" id="create-todo" type="button">Create todo</button><br>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div style="text-align:center; margin:50px;">
+        <h2>This is the second part of the assignment to bring items</h2>
+        <p>Enter valid ToDo list ID to get items</p>
+        <label>TO DO ID</label>
+        <input id="todo-id">
+        <button id="list-items" class="btn btn-primary" type="button">List Items</button><br>
+        <div id="results-items"></div>
+      </div>
+    </div>
+    <div class="col">
+    <div style="text-align:center; margin:50px;">
+      <h2>Add Item to a ToDo list</h2>
+        <label>Item Name</label><br>
+        <input id="item-name"><br>
+        <label>ToDo ID</label><br>
+        <input id="item-todo-id"><br>
+        <label for="vehicle1"> Done or Not Done</label>
+        <input type="checkbox" id="done_check" name="done" value="Done"><br>
+        <button id="add-item" class="btn btn-primary" type="button">Add Items</button><br>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
 
 
 
@@ -39,11 +73,42 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if  (eventRequest.status === 200) { // we expect a 200 from a GET
           resultsDiv.innerHTML=''; // Clear out this resultsDiv
           var jsonArr = JSON.parse(eventRequest.responseText); // we get an array of objects in JSON format
+
+          var table = document.createElement("TABLE");
+          table.classList.add("table")
+          var thead_element = document.createElement("THEAD");
+          var tr_element = document.createElement("TR");
+          var th_element_3= document.createElement("TH");
+          th_element_3.innerHTML = "ID"
+          tr_element.appendChild(th_element_3)
+          var th_element_1= document.createElement("TH");
+          th_element_1.innerHTML = "Title"
+          tr_element.appendChild(th_element_1)
+          var th_element_2= document.createElement("TH");
+          th_element_2.innerHTML = "Created By"
+          tr_element.appendChild(th_element_2)
+          thead_element.appendChild(tr_element)
+
+          
+
+          table.appendChild(thead_element)
+          var tbody_element = document.createElement("TBODY");
           for (let i=0; i<jsonArr.length; i+=1) {
-            let parag = document.createElement('P');
-            parag.textContent = JSON.stringify(jsonArr[i]); // each is a todo object, which we convert to a string for display
-            resultsDiv.appendChild(parag); // and add it to the div
+            var tr_element = document.createElement("TR");
+            var th_element_3= document.createElement("TH");
+            th_element_3.innerHTML = jsonArr[i].id
+            tr_element.appendChild(th_element_3)
+            var th_element_1= document.createElement("TH");
+            th_element_1.innerHTML = jsonArr[i].title
+            tr_element.appendChild(th_element_1)
+            var th_element_2= document.createElement("TH");
+            th_element_2.innerHTML = jsonArr[i].created_by
+            tr_element.appendChild(th_element_2)
+
+            tbody_element.appendChild(tr_element)
           }
+          table.appendChild(tbody_element)
+          resultsDiv.appendChild(table); 
         } else {
           alert(`Return code ${eventRequest.status} ${eventRequest.statusText}`); // this is how we report errors
         }
@@ -61,7 +126,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if(eventRequest.readyState === XMLHttpRequest.DONE) {
         if  (eventRequest.status === 201) {     // this is the expected return code for a POST to create a todo
           resultsDiv.textContent=eventRequest.responseText; // this will be the todo that is created
-        } else {
+
+          alert("ToDo List Successfully Created and Added to Database")
           alert(`Return code ${eventRequest.status} ${eventRequest.statusText} ${eventRequest.responseText}`);  // error handling
         }
       }
@@ -85,6 +151,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if(eventRequest.readyState === XMLHttpRequest.DONE) {
         if  (eventRequest.status === 201) {     // this is the expected return code for a POST to create a todo
           //resultsDiv.textContent=eventRequest.responseText; // this will be the todo that is created
+          alert("Item Successfully Added to ToDo list")
         } else {
           alert(`Return code ${eventRequest.status} ${eventRequest.statusText} ${eventRequest.responseText}`);  // error handling
         }
@@ -108,11 +175,42 @@ document.addEventListener('DOMContentLoaded', (event) => {
           if  (eventRequest.status === 200) { // we expect a 200 from a GET
             resultsItemsDiv.innerHTML=''; // Clear out this resultsDiv
             var jsonArr = JSON.parse(eventRequest.responseText); // we get an array of objects in JSON format
+            
+            var table = document.createElement("TABLE");
+            table.classList.add("table")
+            var thead_element = document.createElement("THEAD");
+            var tr_element = document.createElement("TR");
+            var th_element_3= document.createElement("TH");
+            th_element_3.innerHTML = "Name"
+            tr_element.appendChild(th_element_3)
+            var th_element_1= document.createElement("TH");
+            th_element_1.innerHTML = "Done?"
+            tr_element.appendChild(th_element_1)
+            var th_element_2= document.createElement("TH");
+            th_element_2.innerHTML = "ToDo List ID"
+            tr_element.appendChild(th_element_2)
+            thead_element.appendChild(tr_element)
+  
+            
+  
+            table.appendChild(thead_element)
+            var tbody_element = document.createElement("TBODY");
             for (let i=0; i<jsonArr.length; i+=1) {
-              let parag = document.createElement('P');
-              parag.textContent = JSON.stringify(jsonArr[i]); // each is a todo object, which we convert to a string for display
-              resultsItemsDiv.appendChild(parag); // and add it to the div
+              var tr_element = document.createElement("TR");
+              var th_element_3= document.createElement("TH");
+              th_element_3.innerHTML = jsonArr[i].name
+              tr_element.appendChild(th_element_3)
+              var th_element_1= document.createElement("TH");
+              th_element_1.innerHTML = jsonArr[i].done
+              tr_element.appendChild(th_element_1)
+              var th_element_2= document.createElement("TH");
+              th_element_2.innerHTML = jsonArr[i].todo_id
+              tr_element.appendChild(th_element_2)
+  
+              tbody_element.appendChild(tr_element)
             }
+            table.appendChild(tbody_element)
+            resultsItemsDiv.appendChild(table); 
           } else {
             alert(`Return code ${eventRequest.status} ${eventRequest.statusText}`); // this is how we report errors
           }
